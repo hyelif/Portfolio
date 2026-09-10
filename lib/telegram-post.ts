@@ -54,7 +54,7 @@ export function toMarkdown(post: ParsedPost, slug: string): string {
     "",
   ].join("\n");
 
-  return `${frontmatter}<!-- telegram-bot | slug: ${slug} -->\n\n${post.body}\n`;
+  return `${frontmatter}\n${post.body}\n`;
 }
 
 function githubHeaders(): Record<string, string> {

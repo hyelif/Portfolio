@@ -20,9 +20,17 @@ automatically through its GitHub integration — no manual step needed.
 ### Message format
 
 ```
-/post My Post Title | tag1, tag2
+/post
+Title: My Post Title
+Date: 2026-09-15
+Tags: tag1, tag2
+
 The post body in markdown goes here.
 ```
+
+`Date` is optional (defaults to today) and accepts any date format
+Telegram accepts; `Tags` is optional. The inline shorthand
+`/post Title | tag1, tag2` still works too.
 
 Other commands: `/id` replies with your chat id.
 

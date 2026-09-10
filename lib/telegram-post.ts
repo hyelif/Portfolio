@@ -2,31 +2,76 @@ const GITHUB_API = "https://api.github.com";
 
 export interface ParsedPost {
   title: string;
+  date?: string;
   tags: string[];
   body: string;
 }
 
+// Accepts two formats:
+//
+// Labelled:
+//   /post
+//   Title: My Post Title
+//   Date: 2026-09-15
+//   Tags: tag1, tag2
+//
+//   Content here...
+//
+// Inline (legacy):
+//   /post My Title | tag1, tag2
+//   Content here...
 export function parsePostCommand(text: string): ParsedPost | null {
-  const match = text.match(/^\/post\s+([\s\S]+)$/);
+  const match = text.match(/^\/post\s*([\s\S]+)$/);
   if (!match) return null;
 
-  const rest = match[1];
-  const newlineIdx = rest.indexOf("\n");
+  const rest = match[1].trim();
+  if (!rest) return null;
 
+  const lines = rest.split("\n");
+  let title = "";
+  let date: string | undefined;
+  let tags: string[] = [];
+  let contentStart = 0;
+
+  // Labelled format: leading "Title:" / "Date:" / "Tags:" lines
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    const keyMatch = line.match(/^(title|date|tags)\s*[:=]\s*(.*)$/i);
+    if (!keyMatch) break;
+    const key = keyMatch[1].toLowerCase();
+    const value = keyMatch[2].trim();
+    if (key === "title") title = value;
+    else if (key === "date") date = normalizeDate(value);
+    else if (key === "tags")
+      tags = value.split(",").map((t) => t.trim()).filter(Boolean);
+    contentStart = i + 1;
+  }
+
+  if (title) {
+    const body = lines.slice(contentStart).join("\n").trim();
+    return { title, date, tags, body };
+  }
+
+  // Legacy inline format
+  const newlineIdx = rest.indexOf("\n");
   const header = newlineIdx === -1 ? rest : rest.slice(0, newlineIdx);
   const body = newlineIdx === -1 ? "" : rest.slice(newlineIdx + 1).trim();
 
-  const [title, tagsPart] = header.split("|").map((s) => s.trim());
-  if (!title) return null;
+  const [legacyTitle, tagsPart] = header.split("|").map((s) => s.trim());
+  if (!legacyTitle) return null;
 
-  const tags = tagsPart
-    ? tagsPart
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean)
+  tags = tagsPart
+    ? tagsPart.split(",").map((t) => t.trim()).filter(Boolean)
     : [];
 
-  return { title, tags, body };
+  return { title: legacyTitle, tags, body };
+}
+
+function normalizeDate(value: string): string | undefined {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(value);
+  if (isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString().slice(0, 10);
 }
 
 export function slugify(title: string): string {
@@ -43,12 +88,13 @@ export function toMarkdown(post: ParsedPost, slug: string): string {
   const today = new Date().toISOString().slice(0, 10);
   const tags = post.tags.map((t) => `  - ${t}`).join("\n");
   const body = escapeMdxText(post.body);
+  const title = post.title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
   const frontmatter = [
     "---",
-    `title: ${post.title}`,
+    `title: "${title}"`,
     `description: ""`,
-    `date: ${today}`,
+    `date: ${post.date || today}`,
     `tags:`,
     tags || "  - general",
     "---",

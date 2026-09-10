@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
   if (!msg.text.startsWith("/post")) {
     await reply(
       chatId,
-      "Send a post like:\n\n/post My Title | tag1, tag2\nBody markdown here..."
+      "Send a post like:\n\n/post\nTitle: My Post\nDate: 2026-09-15\nTags: tag1, tag2\n\nContent markdown here...\n\n(Date optional — defaults to today. Inline shorthand also works: /post Title | tags)"
     );
     return NextResponse.json({ ok: true });
   }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   if (!parsed) {
     await reply(
       chatId,
-      "Could not parse. Format:\n\n/post Title | tag1, tag2\nBody here..."
+      "Could not parse. Need a Title line:\n\n/post\nTitle: My Post\nDate: 2026-09-15\nTags: tag1, tag2\n\nContent here..."
     );
     return NextResponse.json({ ok: true });
   }

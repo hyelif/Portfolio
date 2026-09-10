@@ -4,6 +4,8 @@ import {
   createUniqueSlug,
   toMarkdown,
   commitPost,
+  listPosts,
+  deletePost,
 } from "@/lib/telegram-post";
 
 export const runtime = "nodejs";
@@ -52,10 +54,60 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
+  if (msg.text === "/list") {
+    try {
+      const posts = await listPosts();
+      if (posts.length === 0) {
+        await reply(chatId, "No posts yet.");
+        return NextResponse.json({ ok: true });
+      }
+      const lines = posts
+        .map(
+          (p, i) =>
+            `${i + 1}. ${p.date || "?"} — ${p.title}\n   /delete ${p.slug}`
+        )
+        .join("\n");
+      await reply(chatId, `📚 Posts:\n\n${lines}`);
+    } catch (err) {
+      await reply(
+        chatId,
+        `❌ ${err instanceof Error ? err.message : "list failed"}`
+      );
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  if (msg.text === "/delete" || msg.text.startsWith("/delete ")) {
+    const arg = msg.text.replace(/^\/delete\s*/, "").trim();
+    try {
+      if (!arg || arg === "latest") {
+        const posts = await listPosts();
+        if (posts.length === 0) {
+          await reply(chatId, "No posts to delete.");
+          return NextResponse.json({ ok: true });
+        }
+        await deletePost(posts[0].slug);
+        await reply(
+          chatId,
+          `🗑 Deleted "${posts[0].title}" (${posts[0].date}) — redeploying...`
+        );
+      } else {
+        await deletePost(arg);
+        await reply(chatId, `🗑 Deleted "${arg}" — redeploying...`);
+      }
+    } catch (err) {
+      await reply(
+        chatId,
+        `❌ ${err instanceof Error ? err.message : "delete failed"}`
+      );
+    }
+    return NextResponse.json({ ok: true });
+  }
+
   if (!msg.text.startsWith("/post")) {
     await reply(
       chatId,
-      "Send a post like:\n\n/post\nTitle: My Post\nDate: 2026-09-15\nTags: tag1, tag2\n\nContent markdown here...\n\n(Date optional — defaults to today. Inline shorthand also works: /post Title | tags)"
+      "Commands:\n\n/post — create a post:\n/post\nTitle: My Post\nDate: 2026-09-15\nTags: tag1, tag2\n\nContent markdown here...\n\n(Date optional — defaults to today. Shorthand works too: /post Title | tags)\n\n/list — show all posts\n/delete <slug> — delete a post (/delete or /delete latest for newest)\n/id — show your chat id"
     );
     return NextResponse.json({ ok: true });
   }
@@ -86,9 +138,11 @@ export async function POST(req: NextRequest) {
     const markdown = toMarkdown(parsed, slug);
     const { commitUrl } = await commitPost(slug, markdown);
 
+    const date = parsed.date || new Date().toISOString().slice(0, 10);
+    const tags = parsed.tags.length ? parsed.tags.join(", ") : "general";
     await reply(
       chatId,
-      `✅ Post queued: ${parsed.title}\nslug: ${slug}\nVercel deploying...\n${commitUrl}`
+      `✅ Post queued\n\nTitle: ${parsed.title}\nDate: ${date}\nTags: ${tags}\nslug: ${slug}\n\nVercel deploying...\n${commitUrl}`
     );
     return NextResponse.json({ ok: true, slug });
   } catch (err) {

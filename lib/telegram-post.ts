@@ -182,3 +182,72 @@ export async function commitPost(
 
   return { commitUrl: data.commit?.html_url || "" };
 }
+export interface PostListItem {
+  slug: string;
+  title: string;
+  date: string;
+}
+
+export async function listPosts(): Promise<PostListItem[]> {
+  const branch = process.env.GITHUB_BRANCH || "main";
+  const dir = "content/blog";
+  const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${dir}?ref=${branch}`;
+
+  const res = await fetch(url, { headers: githubHeaders() });
+  if (!res.ok) throw new Error(`GitHub listing failed: ${res.status}`);
+
+  const files = (await res.json()) as { name: string }[];
+  const mdFiles = files
+    .filter((f) => f.name.endsWith(".md"))
+    .map((f) => f.name.replace(/\.md$/, ""));
+
+  const matterMod = await import("gray-matter");
+  const matter = matterMod.default;
+
+  const posts = await Promise.all(
+    mdFiles.map(async (slug) => {
+      const raw = await fetch(
+        `https://raw.githubusercontent.com/${process.env.GITHUB_REPO}/${branch}/${dir}/${slug}.md`
+      ).then((r) => (r.ok ? r.text() : ""));
+      const { data } = matter(raw);
+      return {
+        slug,
+        title: data.title || slug,
+        date: String(data.date || ""),
+      };
+    })
+  );
+
+  return posts.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}
+
+export async function deletePost(slug: string): Promise<void> {
+  const dir = "content/blog";
+  const url = `${GITHUB_API}/repos/${process.env.GITHUB_REPO}/contents/${dir}/${slug}.md`;
+
+  const existing = await fetch(url, { headers: githubHeaders() });
+  if (existing.status === 404) {
+    throw new Error(`No post with slug "${slug}"`);
+  }
+  if (!existing.ok) {
+    throw new Error(`GitHub lookup failed: ${existing.status}`);
+  }
+
+  const data = (await existing.json()) as { sha: string };
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: githubHeaders(),
+    body: JSON.stringify({
+      message: `chore: remove blog post "${slug}" via telegram bot`,
+      sha: data.sha,
+      branch: process.env.GITHUB_BRANCH || "main",
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`GitHub delete failed: ${res.status} ${errText}`);
+  }
+}

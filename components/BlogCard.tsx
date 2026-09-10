@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 interface BlogPostSummary {
   slug: string;
   title: string;
@@ -12,24 +13,29 @@ interface Props {
 }
 
 export default function BlogCard({ post }: Props) {
+  const d = new Date(post.date);
+  const valid = !isNaN(d.getTime());
+
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group block p-6 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg transition-all"
+      className="group flex items-baseline gap-5 py-4 border-b border-slate-100 dark:border-slate-800/60 transition-colors"
     >
-      <time className="text-xs text-slate-500 dark:text-slate-400">
-        {new Date(post.date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })}
+      <time
+        dateTime={post.date}
+        className="shrink-0 w-24 text-sm font-medium text-slate-500 dark:text-slate-400 tabular-nums"
+      >
+        {valid
+          ? d.toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })
+          : post.date}
       </time>
-      <h3 className="text-lg font-semibold mt-1 mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+      <span className="text-lg font-medium group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
         {post.title}
-      </h3>
-      <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-        {post.description}
-      </p>
+      </span>
     </Link>
   );
 }

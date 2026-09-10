@@ -4,9 +4,15 @@ export default function Hero() {
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
       <div className="max-w-3xl">
-        <p className="text-sm font-medium text-primary-600 dark:text-primary-400 mb-4">
-          Alif Hakimie
-        </p>
+        <div className="flex items-center gap-2 mb-5">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+          </span>
+          <p className="text-sm font-medium text-slate-600 dark:text-slate-300">
+            Alif Hakimie
+          </p>
+        </div>
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6">
           Telecom Engineering grad who{" "}
           <span className="text-primary-500">speaks fluent C++</span> and makes

@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
         </div>
         <p className="text-xs text-slate-400 dark:text-slate-500 mt-4 text-center sm:text-left">
-          +60 12-375 6932
+          +60 12-375 6932 &middot; hakimiealif53@gmail.com
         </p>
       </div>
     </footer>

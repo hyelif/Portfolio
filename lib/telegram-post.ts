@@ -42,6 +42,7 @@ export function slugify(title: string): string {
 export function toMarkdown(post: ParsedPost, slug: string): string {
   const today = new Date().toISOString().slice(0, 10);
   const tags = post.tags.map((t) => `  - ${t}`).join("\n");
+  const body = escapeMdxText(post.body);
 
   const frontmatter = [
     "---",
@@ -54,7 +55,34 @@ export function toMarkdown(post: ParsedPost, slug: string): string {
     "",
   ].join("\n");
 
-  return `${frontmatter}\n${post.body}\n`;
+  return `${frontmatter}\n${body}\n`;
+}
+
+// MDX treats <tag> and {expr} as JSX anywhere outside code spans/fences,
+// which breaks the build. Convert them to character references that render
+// literally. Fenced code blocks and inline code spans are left untouched —
+// MDX already parses those as literal text.
+export function escapeMdxText(body: string): string {
+  const segments = body.split(/(```[\s\S]*?```|~~~[\s\S]*?~~~)/);
+
+  return segments
+    .map((segment, i) => {
+      // Odd segments are the code fences themselves - leave as-is
+      if (i % 2 === 1) return segment;
+      // Skip inline code spans; escape the plain text between them
+      return segment
+        .split(/(`[^`\n]+`)/)
+        .map((part, j) =>
+          j % 2 === 1
+            ? part
+            : part.replace(
+                /([<{])/g,
+                (ch) => (ch === "<" ? "&lt;" : "&#123;")
+              )
+        )
+        .join("");
+    })
+    .join("");
 }
 
 function githubHeaders(): Record<string, string> {

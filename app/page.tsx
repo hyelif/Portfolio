@@ -37,7 +37,7 @@ export default function Home() {
 
       {/* Recent Blog Posts */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="section-heading">Latest Posts</h2>
           <a
             href="/blog"
@@ -46,7 +46,7 @@ export default function Home() {
             View all &rarr;
           </a>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-3xl">
           {posts.map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}

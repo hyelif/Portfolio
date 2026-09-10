@@ -32,12 +32,12 @@ const skillCategories = [
 
 export default function Skills() {
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 className="section-heading mb-8">Skills</h2>
-      <div className="grid gap-x-12 gap-y-6 sm:grid-cols-2">
+    <div>
+      <h2 className="section-heading mb-6">Skills</h2>
+      <div className="space-y-6">
         {skillCategories.map((cat) => (
           <div key={cat.title}>
-            <h3 className="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-2.5">
               {cat.title}
             </h3>
             <ul className="space-y-2.5">
@@ -70,6 +70,6 @@ export default function Skills() {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

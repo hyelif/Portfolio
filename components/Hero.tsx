@@ -2,7 +2,6 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
       <div className="max-w-3xl">
         <div className="flex items-center gap-2 mb-5">
           <span className="relative flex h-2.5 w-2.5">
@@ -49,6 +48,5 @@ export default function Hero() {
           </Link>
         </div>
       </div>
-    </section>
   );
 }

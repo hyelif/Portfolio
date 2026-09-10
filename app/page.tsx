@@ -11,11 +11,13 @@ export default function Home() {
 
   return (
     <div className="space-y-24 pb-24">
-      {/* Hero */}
-      <Hero />
-
-      {/* Skills */}
-      <Skills />
+      {/* Hero + Skills side by side */}
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+        <div className="grid gap-12 lg:grid-cols-[3fr_2fr] lg:gap-16 items-start">
+          <Hero />
+          <Skills />
+        </div>
+      </section>
 
       {/* Featured Projects */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

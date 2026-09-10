@@ -32,9 +32,9 @@ const skillCategories = [
 
 export default function Skills() {
   return (
-    <div>
+    <div className="lg:pt-10">
       <h2 className="section-heading mb-6">Skills</h2>
-      <div className="space-y-6">
+      <div className="space-y-6 lg:space-y-5">
         {skillCategories.map((cat) => (
           <div key={cat.title}>
             <h3 className="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-2.5">

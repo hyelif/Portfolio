@@ -12,7 +12,7 @@ export default function Hero() {
             Alif Hakimie
           </p>
         </div>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight mb-6">
+        <h1 className="text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight leading-[1.15] mb-6">
           Telecom Engineering grad who{" "}
           <span className="text-primary-500">speaks fluent C++</span> and makes
           things talk to each other.
